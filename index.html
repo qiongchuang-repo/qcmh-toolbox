@@ -1,14 +1,13 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f5f7fb">
-<meta name="description" content="QCMH Toolbox 免费上班族工具箱：工资估算、加班费计算、工时记录和工资明细核对。">
+<meta name="description" content="QCMH Toolbox 免费上班族工具箱：工资估算、加班费估算、工时记录和工资明细核对。">
 <title>QCMH Toolbox - 上班族实用工具箱</title>
 <style>
-:root{--bg:#f5f7fb;--card:#fff;--text:#202938;--muted:#6b7280;--line:#e5e9f0;--primary:#5265e8;--soft:#eef0ff;--green:#16845b}
+:root{--bg:#f5f7fb;--card:#fff;--text:#202938;--muted:#6b7280;--line:#e5e9f0;--primary:#5265e8;--soft:#eef0ff;--green:#16845b;--red:#bd3546}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6}
 header{background:linear-gradient(135deg,#5265e8,#8274ee);color:white;padding:26px 18px 30px}
@@ -21,7 +20,7 @@ header{background:linear-gradient(135deg,#5265e8,#8274ee);color:white;padding:26
 .section-title{font-size:19px;font-weight:800;margin:8px 0 13px}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:17px 15px;box-shadow:0 3px 12px #1d2b4d08}
-.tool{cursor:pointer;text-align:left;color:var(--text);font:inherit;transition:transform .15s}
+.tool{cursor:pointer;text-align:left;color:var(--text);font:inherit;transition:transform .15s;width:100%}
 .tool:active{transform:scale(.98)}
 .icon{display:flex;width:43px;height:43px;align-items:center;justify-content:center;background:var(--soft);border-radius:13px;font-size:23px;margin-bottom:10px}
 .tool strong{display:block;font-size:15px}
@@ -30,6 +29,7 @@ header{background:linear-gradient(135deg,#5265e8,#8274ee);color:white;padding:26
 .panel.active{display:block}
 .panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
 .panel h2{font-size:21px;margin:0}
+button{font-family:inherit;cursor:pointer}
 .back{border:0;background:var(--soft);color:var(--primary);padding:8px 13px;border-radius:9px;font-size:14px}
 label{display:block;font-size:13px;font-weight:650;margin:13px 0 5px}
 input,select,textarea{width:100%;padding:12px;border:1px solid #dce1ea;border-radius:10px;background:white;color:var(--text);font:inherit;font-size:15px;min-width:0}
@@ -37,13 +37,14 @@ textarea{min-height:90px;resize:vertical}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .btn{border:0;background:var(--primary);color:white;border-radius:10px;padding:12px 15px;font-size:15px;font-weight:700;cursor:pointer;margin-top:15px}
 .btn.secondary{background:#edf0f6;color:#303849}
+.btn.danger{background:#fff0f1;color:var(--red)}
 .result{background:#f0f2ff;border-radius:12px;padding:15px;margin-top:14px;overflow-wrap:anywhere}
 .result strong.big{font-size:25px;color:#414fcb}
 .note{font-size:12px;color:var(--muted);margin-top:10px}
 footer{border-top:1px solid var(--line);padding:20px 5px;margin-top:28px;color:var(--muted);font-size:12px}
-footer button{border:0;background:none;color:var(--primary);padding:0}
-.item{padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
-.item button{float:right;border:0;color:#c43c48;background:none}
+.item{padding:12px 0;border-bottom:1px solid var(--line);font-size:14px;overflow-wrap:anywhere}
+.item button{float:right;border:0;color:var(--red);background:none}
+.hidden{display:none!important}
 @media(min-width:650px){header{padding:30px 25px 36px}.wrap{padding:28px 25px 50px}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero h1{font-size:36px}}
 </style>
 </head>
@@ -51,10 +52,7 @@ footer button{border:0;background:none;color:var(--primary);padding:0}
 <header>
   <div class="top">
     <div class="brand">🧰 QCMH Toolbox</div>
-    <div class="hero">
-      <h1>让工作和生活，<br>计算得更明白。</h1>
-      <p>免费实用工具 · 手机打开即用 · 无需注册</p>
-    </div>
+    <div class="hero"><h1>让工作和生活，<br>计算得更明白。</h1><p>免费实用工具 · 手机打开即用 · 无需注册</p></div>
     <input class="search" id="search" placeholder="搜索工具，例如：加班、工资、工时" aria-label="搜索工具">
   </div>
 </header>
@@ -62,21 +60,173 @@ footer button{border:0;background:none;color:var(--primary);padding:0}
   <div id="home">
     <div class="section-title">实用工具</div>
     <div class="grid" id="tools">
-      <button class="card tool" data-tool="salary"><span class="icon">💰</span><strong>工资计算器</strong><small>汇总工资、补贴与扣款</small></button>
-      <button class="card tool" data-tool="overtime"><span class="icon">⏱️</span><strong>加班费估算</strong><small>估算不同类型加班收入</small></button>
-      <button class="card tool" data-tool="hours"><span class="icon">📅</span><strong>工时记录器</strong><small>记录班次并汇总工时</small></button>
-      <button class="card tool" data-tool="check"><span class="icon">🧾</span><strong>工资条核对</strong><small>核算收入、扣款与差额</small></button>
+      <button type="button" class="card tool" data-tool="salary"><span class="icon">💰</span><strong>工资计算器</strong><small>汇总工资、补贴与扣款</small></button>
+      <button type="button" class="card tool" data-tool="overtime"><span class="icon">⏱️</span><strong>加班费估算</strong><small>估算不同类型加班收入</small></button>
+      <button type="button" class="card tool" data-tool="hours"><span class="icon">📅</span><strong>工时记录器</strong><small>记录班次并汇总工时</small></button>
+      <button type="button" class="card tool" data-tool="check"><span class="icon">🧾</span><strong>工资条核对</strong><small>核算收入、扣款与差额</small></button>
     </div>
     <div class="section-title" style="margin-top:28px">使用说明</div>
-    <div class="card">
-      <strong>你的数据，尽量留在你的设备上</strong>
-      <p class="note">本页面的计算在浏览器中进行。工时记录保存在当前浏览器中，请定期导出备份。不要在公共设备上输入敏感个人信息。</p>
-    </div>
+    <div class="card"><strong>你的数据，尽量留在你的设备上</strong><p class="note">计算在浏览器本地进行。工时记录保存在当前浏览器中，可导出 CSV 备份。不要在公共设备上输入敏感个人信息。</p></div>
   </div>
 
   <section class="panel" id="salary">
-    <div class="panel-head"><h2>💰 工资计算器</h2><button class="back" data-back>返回工具箱</button></div>
+    <div class="panel-head"><h2>💰 工资计算器</h2><button type="button" class="back" data-back>返回工具箱</button></div>
     <div class="card">
-      <label>基本工资（元）</label><input id="sBase" type="number" min="0" placeholder="例如 5000">
-      <div class="row"><div><label>奖金及补贴（元）</label><input id="sBonus" type="number" min="0" value="0"></div><div><label>其他扣款（元）</label><input id="sDeduct" type="number" min="0" value="0"></div></div>
-      <label>已知的社保、个税等扣款（元）</label><input id="sTax" type="number" min="0" value="0">
+      <label for="sBase">基本工资（元）</label><input id="sBase" type="number" min="0" step="0.01" placeholder="例如 5000">
+      <div class="row"><div><label for="sBonus">奖金及补贴（元）</label><input id="sBonus" type="number" min="0" step="0.01" value="0"></div><div><label for="sDeduct">其他扣款（元）</label><input id="sDeduct" type="number" min="0" step="0.01" value="0"></div></div>
+      <label for="sTax">已知的社保、个税等扣款（元）</label><input id="sTax" type="number" min="0" step="0.01" value="0">
+      <button type="button" class="btn" id="salaryCalc">计算实发工资</button>
+      <div class="result hidden" id="salaryResult" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="overtime">
+    <div class="panel-head"><h2>⏱️ 加班费估算</h2><button type="button" class="back" data-back>返回工具箱</button></div>
+    <div class="card">
+      <label for="oBase">加班工资计算基数（元/月）</label><input id="oBase" type="number" min="0" step="0.01" placeholder="输入适用的工资基数">
+      <div class="row"><div><label for="oHours">加班时长（小时）</label><input id="oHours" type="number" min="0" step="0.5" placeholder="例如 4"></div><div><label for="oType">加班类型</label><select id="oType"><option value="1.5">工作日（示例 1.5 倍）</option><option value="2">休息日（示例 2 倍）</option><option value="3">法定节假日（示例 3 倍）</option></select></div></div>
+      <label for="oMonthlyHours">月计薪小时数（用于估算）</label><input id="oMonthlyHours" type="number" min="1" step="0.1" value="174">
+      <button type="button" class="btn" id="overtimeCalc">估算加班费</button>
+      <div class="result hidden" id="overtimeResult" aria-live="polite"></div>
+      <p class="note">仅为按你输入参数计算的示例估算。适用基数、计薪小时数、休息日补休等规则可能因情况而异，请以当地现行规定和劳动合同为准。</p>
+    </div>
+  </section>
+
+  <section class="panel" id="hours">
+    <div class="panel-head"><h2>📅 工时记录器</h2><button type="button" class="back" data-back>返回工具箱</button></div>
+    <div class="card">
+      <label for="hDate">日期</label><input id="hDate" type="date">
+      <div class="row"><div><label for="hStart">开始时间</label><input id="hStart" type="time" value="09:00"></div><div><label for="hEnd">结束时间</label><input id="hEnd" type="time" value="18:00"></div></div>
+      <div class="row"><div><label for="hBreak">休息时长（小时）</label><input id="hBreak" type="number" min="0" step="0.25" value="1"></div><div><label for="hNote">备注（可选）</label><input id="hNote" type="text" placeholder="例如：白班"></div></div>
+      <button type="button" class="btn" id="hoursAdd">保存这条工时</button>
+      <button type="button" class="btn secondary" id="hoursExport">导出 CSV 备份</button>
+      <div class="result" id="hoursSummary" aria-live="polite">正在读取本地记录…</div>
+      <div id="hoursList"></div>
+      <p class="note">记录保存在当前浏览器的本地存储中。清除浏览器数据、更换设备或浏览器后可能无法找回，请定期导出备份。</p>
+    </div>
+  </section>
+
+  <section class="panel" id="check">
+    <div class="panel-head"><h2>🧾 工资条核对</h2><button type="button" class="back" data-back>返回工具箱</button></div>
+    <div class="card">
+      <label for="cBase">基本工资（元）</label><input id="cBase" type="number" min="0" step="0.01" value="0">
+      <div class="row"><div><label for="cBonus">奖金及补贴（元）</label><input id="cBonus" type="number" min="0" step="0.01" value="0"></div><div><label for="cOvertime">加班费（元）</label><input id="cOvertime" type="number" min="0" step="0.01" value="0"></div></div>
+      <div class="row"><div><label for="cOther">其他应发（元）</label><input id="cOther" type="number" min="0" step="0.01" value="0"></div><div><label for="cDeduct">其他扣款（元）</label><input id="cDeduct" type="number" min="0" step="0.01" value="0"></div></div>
+      <label for="cTax">社保、个税等扣款（元）</label><input id="cTax" type="number" min="0" step="0.01" value="0">
+      <label for="cActual">工资条显示的实发金额（元）</label><input id="cActual" type="number" min="0" step="0.01" placeholder="输入工资条上的实发金额">
+      <button type="button" class="btn" id="checkCalc">核对工资条</button>
+      <div class="result hidden" id="checkResult" aria-live="polite"></div>
+      <p class="note">此工具仅进行算术核对，不判断工资条是否符合法律规定。请确认各项目口径一致。</p>
+    </div>
+  </section>
+
+  <footer>QCMH Toolbox · 免费上班族实用工具<br>计算结果仅供参考，请核对实际制度与凭证。</footer>
+</main>
+<script>
+(function(){
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const money = n => new Intl.NumberFormat("zh-CN",{style:"currency",currency:"CNY"}).format(Number(n)||0);
+  const num = id => { const v = Number($(id).value); return Number.isFinite(v) ? v : 0; };
+  const show = (id, html) => { $(id).innerHTML = html; $(id).classList.remove("hidden"); };
+  const escapeHTML = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const home = $("home");
+  const panels = Array.from(document.querySelectorAll(".panel"));
+
+  function openPanel(name){
+    if(!$(name)) return;
+    home.classList.add("hidden");
+    panels.forEach(p => p.classList.toggle("active", p.id === name));
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  function goHome(){
+    panels.forEach(p => p.classList.remove("active"));
+    home.classList.remove("hidden");
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  document.querySelectorAll("[data-tool]").forEach(btn=>{
+    btn.addEventListener("click",()=>openPanel(btn.dataset.tool));
+  });
+  document.querySelectorAll("[data-back]").forEach(btn=>btn.addEventListener("click",goHome));
+
+  $("search").addEventListener("input",e=>{
+    const q=e.target.value.trim().toLowerCase();
+    document.querySelectorAll("[data-tool]").forEach(btn=>{
+      btn.classList.toggle("hidden",!btn.innerText.toLowerCase().includes(q));
+    });
+  });
+
+  $("salaryCalc").addEventListener("click",()=>{
+    const base=num("sBase"), bonus=num("sBonus"), deduct=num("sDeduct"), tax=num("sTax");
+    if($("sBase").value.trim()==="" || base<0 || bonus<0 || deduct<0 || tax<0){
+      show("salaryResult","请填写有效的非负金额。"); return;
+    }
+    const gross=base+bonus, net=gross-deduct-tax;
+    show("salaryResult",`应发合计：<strong>${money(gross)}</strong><br>扣款合计：<strong>${money(deduct+tax)}</strong><br>预计实发：<strong class="big">${money(net)}</strong>`);
+  });
+
+  $("overtimeCalc").addEventListener("click",()=>{
+    const base=num("oBase"), hours=num("oHours"), factor=num("oType"), monthly=num("oMonthlyHours");
+    if($("oBase").value.trim()==="" || $("oHours").value.trim()==="" || base<0 || hours<0 || monthly<=0){
+      show("overtimeResult","请填写有效的工资基数、加班时长和月计薪小时数。"); return;
+    }
+    const hourly=base/monthly, pay=hourly*hours*factor;
+    show("overtimeResult",`估算小时工资：<strong>${money(hourly)}</strong><br>加班时长：<strong>${hours} 小时</strong><br>估算加班费：<strong class="big">${money(pay)}</strong>`);
+  });
+
+  const STORAGE_KEY="qcmh-toolbox-hours-v1";
+  let records=[];
+  try{records=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");if(!Array.isArray(records))records=[];}catch(e){records=[];}
+  const today= new Date();
+  $("hDate").value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
+
+  function duration(start,end,breakHours){
+    const toMin=t=>{const [h,m]=t.split(":").map(Number);return h*60+m;};
+    let mins=toMin(end)-toMin(start); if(mins<0) mins+=1440;
+    return Math.max(0,mins/60-breakHours);
+  }
+  function renderHours(){
+    const total=records.reduce((sum,r)=>sum+r.hours,0);
+    $("hoursSummary").innerHTML=`共 <strong>${records.length}</strong> 条记录，累计工时 <strong>${total.toFixed(2)}</strong> 小时`;
+    $("hoursList").innerHTML=records.length?records.slice().reverse().map(r=>`<div class="item"><button type="button" data-delete="${escapeHTML(r.id)}">删除</button><strong>${escapeHTML(r.date)}</strong> · ${escapeHTML(r.start)}–${escapeHTML(r.end)} · ${r.hours.toFixed(2)} 小时${r.note?`<br>备注：${escapeHTML(r.note)}`:""}</div>`).join(""):"<p class='note'>还没有工时记录。</p>";
+    $("hoursList").querySelectorAll("[data-delete]").forEach(btn=>btn.addEventListener("click",()=>{
+      records=records.filter(r=>r.id!==btn.dataset.delete);saveRecords();renderHours();
+    }));
+  }
+  function saveRecords(){
+    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(records));}
+    catch(e){alert("无法保存到此浏览器。请检查浏览器存储空间或隐私设置，并导出已有记录。");}
+  }
+  $("hoursAdd").addEventListener("click",()=>{
+    const date=$("hDate").value,start=$("hStart").value,end=$("hEnd").value,br=num("hBreak"),note=$("hNote").value.trim();
+    if(!date||!start||!end||br<0){alert("请填写日期、开始时间、结束时间和有效的休息时长。");return;}
+    const hours=duration(start,end,br);
+    if(hours<=0){alert("计算工时必须大于 0，请检查时间和休息时长。");return;}
+    records.push({id:`${Date.now()}-${Math.random().toString(16).slice(2)}`,date,start,end,breakHours:br,hours,note});
+    saveRecords();renderHours();$("hNote").value="";
+  });
+  $("hoursExport").addEventListener("click",()=>{
+    const rows=[["日期","开始时间","结束时间","休息时长","净工时","备注"],...records.map(r=>[r.date,r.start,r.end,r.breakHours,r.hours.toFixed(2),r.note])];
+    const csv="\uFEFF"+rows.map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+    const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+    const url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download="qcmh-hours-records.csv";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  });
+
+  $("checkCalc").addEventListener("click",()=>{
+    const base=num("cBase"),bonus=num("cBonus"),overtime=num("cOvertime"),other=num("cOther"),deduct=num("cDeduct"),tax=num("cTax"),actual=num("cActual");
+    const ids=["cBase","cBonus","cOvertime","cOther","cDeduct","cTax","cActual"];
+    if(ids.some(id=>$(id).value.trim()===""||num(id)<0)){
+      show("checkResult","请填写全部金额，且金额不能为负数。");return;
+    }
+    const gross=base+bonus+overtime+other, net=gross-deduct-tax, diff=actual-net;
+    const msg=Math.abs(diff)<0.005?"与输入项目计算结果一致。":diff>0?`工资条实发比计算结果多 ${money(diff)}。`:`工资条实发比计算结果少 ${money(-diff)}。`;
+    show("checkResult",`应发合计：<strong>${money(gross)}</strong><br>扣款合计：<strong>${money(deduct+tax)}</strong><br>按项目计算的实发：<strong>${money(net)}</strong><br>工资条实发：<strong>${money(actual)}</strong><br><br><strong>${msg}</strong>`);
+  });
+
+  renderHours();
+})();
+</script>
+</body>
+</html>
